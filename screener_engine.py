@@ -554,6 +554,111 @@ def calculate_quality_score(calc_yield, institutions, is_psu, asset_type, promot
     return round(min(100.0, max(10.0, score)), 1)
 
 
+def compute_screener_rankings(df):
+    """
+    Computes an institutional Buy Conviction Score (0 - 100) and assigns Rank:
+    Rank 1 is the most preferred asset for buying.
+    
+    Ranking Weights:
+    1. Yield & G-Sec Spread Advantage (30% weight): Yield relative to 10Y Indian G-Sec (6.80%).
+    2. Quality Score (25% weight): Cash flow reliability, FII+DII backing, and balance sheet safety.
+    3. Margin of Safety (20% weight): Deeper discount from 52-Week High provides downside buffer & higher yield on cost.
+    4. Distribution Sustainability (15% weight): NDCF pass-through for REITs/InvITs; sustainable 30-80% payout for equities.
+    5. Technical Entry Support (10% weight): Healthy accumulation zone (RSI 35-55) & moving average strength.
+    """
+    if df.empty:
+        return df
+
+    scores = []
+    for _, row in df.iterrows():
+        # 1. Spread / Yield Advantage (max 30)
+        y = float(row.get('Yield (%)', 0.0) or 0.0)
+        spread_score = min(30.0, max(0.0, (y / 12.0) * 30.0))
+
+        # 2. Institutional Quality & Moat (max 25)
+        q = float(row.get('Quality Score', 50.0) or 50.0)
+        quality_score = (q / 100.0) * 25.0
+
+        # 3. Valuation Margin of Safety from 52W High (max 20)
+        p_52w = float(row.get('From 52W H (%)', -10.0) or -10.0)
+        discount_score = min(20.0, max(5.0, 10.0 + (-p_52w) * 0.5))
+
+        # 4. Distribution & Balance Sheet Health (max 15)
+        asset_type = str(row.get('Type', 'Equity'))
+        de_raw = row.get('Raw_DE', 1.0)
+        try:
+            de = float(de_raw) if de_raw != '-' else 1.0
+        except Exception:
+            de = 1.0
+
+        payout_raw = str(row.get('Payout (%)', '50%')).replace('%', '').strip()
+        try:
+            payout = float(payout_raw) if payout_raw != '-' else 50.0
+        except Exception:
+            payout = 50.0
+
+        if asset_type in ['REIT', 'InvIT']:
+            dist_score = 15.0  # Regulated statutory pass-through cash flow
+        else:
+            if 30.0 <= payout <= 80.0:
+                dist_score = 14.0
+            elif 80.0 < payout <= 100.0:
+                dist_score = 11.0
+            else:
+                dist_score = 7.0
+            if de > 2.5:
+                dist_score = max(3.0, dist_score - 4.0)
+
+        # 5. Technical Entry Zone (max 10)
+        rsi_raw = row.get('Raw_RSI', 50.0)
+        try:
+            rsi = float(rsi_raw)
+        except Exception:
+            rsi = 50.0
+
+        if 35 <= rsi <= 55:
+            tech_score = 10.0
+        elif 55 < rsi <= 65:
+            tech_score = 8.0
+        else:
+            tech_score = 6.0
+
+        total_buy_score = round(spread_score + quality_score + discount_score + dist_score + tech_score, 1)
+        scores.append(total_buy_score)
+
+    df_ranked = df.copy()
+    df_ranked['Buy Score'] = scores
+    # Sort strictly by Buy Score descending so Rank 1 is the most preferred
+    df_ranked = df_ranked.sort_values(by='Buy Score', ascending=False).reset_index(drop=True)
+    df_ranked['Rank'] = range(1, len(df_ranked) + 1)
+
+    def get_rank_badge(r):
+        if r == 1:
+            return '🥇 #1'
+        elif r == 2:
+            return '🥈 #2'
+        elif r == 3:
+            return '🥉 #3'
+        elif r <= 5:
+            return f'⭐ #{r}'
+        else:
+            return f'#{r}'
+
+    def get_tier(r):
+        if r <= 5:
+            return '🔥 Top Conviction Buy'
+        elif r <= 12:
+            return '🟢 Strong Accumulate'
+        elif r <= 22:
+            return '🟡 Moderate Buy'
+        else:
+            return '⚪ Defensive / Hold'
+
+    df_ranked['Rank_Badge'] = df_ranked['Rank'].apply(get_rank_badge)
+    df_ranked['Suitability'] = df_ranked['Rank'].apply(get_tier)
+    return df_ranked
+
+
 def generate_baseline_dataset():
     """
     Builds a baseline DataFrame from the verified institutional universe.
@@ -608,7 +713,8 @@ def generate_baseline_dataset():
             "Data_Source": "Baseline Seed"
         })
 
-    return pd.DataFrame(records)
+    df_base = pd.DataFrame(records)
+    return compute_screener_rankings(df_base)
 
 
 def fetch_live_screener_universe(timeout=8):
@@ -710,7 +816,8 @@ def fetch_live_screener_universe(timeout=8):
             })
 
         df_res = pd.DataFrame(records)
-        return df_res, "🟢 Live Batch Market Feed (Real-Time)"
+        df_ranked = compute_screener_rankings(df_res)
+        return df_ranked, "🟢 Live Batch Market Feed (Real-Time)"
 
     except Exception as e:
         return baseline_df, f"🟡 Cached Snapshot (Fallback: {e})"
@@ -750,6 +857,10 @@ def load_screener_cache():
                 payload = json.load(f)
             df = pd.DataFrame(payload.get("data", []))
             if not df.empty:
+                if "Rank" not in df.columns or "Buy Score" not in df.columns:
+                    df = compute_screener_rankings(df)
+                else:
+                    df = df.sort_values(by="Rank", ascending=True).reset_index(drop=True)
                 return df, payload.get("last_updated", "Cached"), payload.get("feed_status", "Cached Snapshot")
         except Exception:
             pass

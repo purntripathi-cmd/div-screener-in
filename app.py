@@ -65,6 +65,27 @@ st.markdown("""
         background-color: rgba(16, 185, 129, 0.08);
         color: inherit;
     }
+    .conviction-card {
+        padding: 10px 14px;
+        border-radius: 8px;
+        border: 1px solid rgba(16, 185, 129, 0.35);
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(59, 130, 246, 0.05) 100%);
+        margin-bottom: 12px;
+    }
+    .card-title {
+        font-size: 0.95rem;
+        font-weight: 700;
+        margin-bottom: 2px;
+    }
+    .card-sub {
+        font-size: 0.78rem;
+        color: #888888;
+        margin-bottom: 6px;
+    }
+    .card-metric {
+        font-size: 0.84rem;
+        font-weight: 600;
+    }
     hr {
         margin-top: 0.5rem !important;
         margin-bottom: 0.5rem !important;
@@ -80,6 +101,7 @@ from screener_engine import (
     load_screener_cache, 
     fetch_live_screener_universe, 
     save_screener_cache,
+    compute_screener_rankings,
     ASSET_UNIVERSE
 )
 
@@ -90,7 +112,7 @@ df, last_updated, feed_status = load_screener_cache()
 h_left, h_right = st.columns([3.8, 1.4])
 with h_left:
     st.title("⚡ Dynamic Dividend, REIT & InvIT Screener")
-    st.caption(f"Real-time yield screener calibrated against 10Y Indian Sovereign G-Sec Benchmark ({INDIA_10Y_GSEC_BENCHMARK:.2f}%) • Auto-refreshes every 15 minutes")
+    st.caption(f"Ranked by Institutional Buy Suitability (Rank #1 = Most Preferred) • Benchmark: 10Y G-Sec ({INDIA_10Y_GSEC_BENCHMARK:.2f}%) • 15m Auto-Sync")
 
 with h_right:
     st.write("")
@@ -106,7 +128,8 @@ st.markdown(
     <div class="status-banner">
         ⏱️ <b>Auto-Refresh Engine: Active</b> (15-min background daemon + in-browser sync) &nbsp;|&nbsp; 
         🕒 <b>Last Data Update:</b> {last_updated} &nbsp;|&nbsp; 
-        📡 <b>Feed Status:</b> {feed_status}
+        📡 <b>Feed Status:</b> {feed_status} &nbsp;|&nbsp;
+        🎯 <b>Sorting:</b> Ranked by Buy Suitability (Rank 1 = Most Preferred)
     </div>
     """, 
     unsafe_allow_html=True
@@ -141,8 +164,12 @@ tech_condition = st.sidebar.selectbox(
     ["All", "Above 200 EMA (Bullish)", "Above 50 EMA", "RSI Oversold (< 40)", "RSI Healthy (40 - 65)"]
 )
 
-# Data Filtering Logic
+# Data Filtering & Ranking Logic
 if not df.empty:
+    # Ensure ranking columns exist
+    if "Rank" not in df.columns or "Buy Score" not in df.columns:
+        df = compute_screener_rankings(df)
+
     filtered = df.copy()
 
     # Asset Classification Filter
@@ -177,41 +204,81 @@ if not df.empty:
     elif tech_condition == "RSI Healthy (40 - 65)":
         filtered = filtered[(filtered["Raw_RSI"] >= 40) & (filtered["Raw_RSI"] <= 65)]
 
-    filtered = filtered.sort_values(by="Yield (%)", ascending=False)
+    # Sort strictly by Rank ascending (Rank 1 = Most Preferred at top)
+    filtered = filtered.sort_values(by="Rank", ascending=True).reset_index(drop=True)
 
     # Key Summary Metrics
     m1, m2, m3, m4, m5, m6 = st.columns(6)
     m1.metric("Screened Assets", f"{len(filtered)} / {len(df)}")
-    m2.metric("Avg Yield", f"{round(filtered['Yield (%)'].mean(), 2)}%" if not filtered.empty else "0%")
-    top_yield_asset = f"{filtered.iloc[0]['Ticker']} ({filtered.iloc[0]['Yield (%)']}%)" if not filtered.empty else "-"
-    m3.metric("Top Yield", top_yield_asset)
-    m4.metric("Avg G-Sec Spread", f"{int(filtered['G-Sec Spread (bps)'].mean()):+d} bps" if not filtered.empty else "0 bps")
-    m5.metric("PSU Assets", f"{len(filtered[filtered['Is_PSU']])}" if not filtered.empty else "0")
-    m6.metric("AAA Trusts", f"{len(filtered[filtered['Type'].isin(['REIT', 'InvIT'])])}" if not filtered.empty else "0")
+    
+    top_rank_1 = f"{filtered.iloc[0]['Ticker']} ({filtered.iloc[0]['Yield (%)']}%)" if not filtered.empty else "-"
+    m2.metric("🥇 Rank 1 Asset", top_rank_1)
+
+    top_rank_2 = f"{filtered.iloc[1]['Ticker']} ({filtered.iloc[1]['Yield (%)']}%)" if len(filtered) > 1 else "-"
+    m3.metric("🥈 Rank 2 Asset", top_rank_2)
+
+    m4.metric("Avg Screened Yield", f"{round(filtered['Yield (%)'].mean(), 2)}%" if not filtered.empty else "0%")
+    m5.metric("Avg G-Sec Spread", f"{int(filtered['G-Sec Spread (bps)'].mean()):+d} bps" if not filtered.empty else "0 bps")
+    m6.metric("Top Conviction (Rank 1-5)", f"{len(filtered[filtered['Rank'] <= 5])}" if not filtered.empty else "0")
 
     st.markdown("---")
 
+    # Top 3 Conviction Buy Showcase Cards
+    if len(filtered) >= 3:
+        st.markdown("#### 🏆 Top Conviction Buy Recommendations (Most Preferred)")
+        c_top1, c_top2, c_top3 = st.columns(3)
+        top_cards = [
+            (c_top1, filtered.iloc[0], "🥇 Rank 1 (Most Preferred)"),
+            (c_top2, filtered.iloc[1], "🥈 Rank 2"),
+            (c_top3, filtered.iloc[2], "🥉 Rank 3")
+        ]
+        for col, row, rank_title in top_cards:
+            with col:
+                st.markdown(
+                    f"""
+                    <div class="conviction-card">
+                        <div class="card-title">{rank_title}: <b>{row['Ticker']}</b> ({row['Name']})</div>
+                        <div class="card-sub">{row['Class']} • Sector: {row['Sector']}</div>
+                        <div class="card-metric">
+                            💰 <b>CMP:</b> ₹{row['CMP (₹)']} &nbsp;|&nbsp; 
+                            📈 <b>Yield:</b> <span style="color:#10b981;">{row['Yield (%)']}%</span> &nbsp;|&nbsp; 
+                            🎯 <b>Buy Score:</b> <b>{row['Buy Score']}/100</b>
+                        </div>
+                        <div style="font-size:0.75rem; margin-top:4px; color:#666;">
+                            🏛️ <b>G-Sec Spread:</b> {row['G-Sec Spread (bps)']:+d} bps &nbsp;|&nbsp; 
+                            🛡️ <b>Quality:</b> {row['Quality Score']}/100 &nbsp;|&nbsp;
+                            🏷️ <b>Status:</b> {row['Suitability']}
+                        </div>
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
+
     # Visual Analytics Tabs
-    tab_grid, tab_charts, tab_tax_guide, tab_daemon = st.tabs([
-        "📋 Screener Table", 
+    tab_grid, tab_charts, tab_methodology, tab_tax_guide, tab_daemon = st.tabs([
+        "📋 Screener Table (Ranked)", 
         "📊 Yield & Risk Analytics", 
+        "📐 Buy Ranking Methodology",
         "📑 Tax & SEBI NDCF Framework",
         "⚙️ Background 15-Min Auto-Sync"
     ])
 
     with tab_grid:
         display_cols = [
-            "Ticker", "Name", "Class", "Sector", "CMP (₹)", "Chg (%)",
-            "TTM DPU (₹)", "Yield (%)", "G-Sec Spread (bps)", "Quality Score", 
-            "P/E", "P/B", "D/E", "Payout (%)", "Promoter (%)", "Inst (%)", 
+            "Rank_Badge", "Suitability", "Ticker", "Name", "Class", "Sector", "CMP (₹)", "Chg (%)",
+            "Yield (%)", "G-Sec Spread (bps)", "Buy Score", "Quality Score", 
+            "TTM DPU (₹)", "P/E", "P/B", "D/E", "Payout (%)", "Promoter (%)", "Inst (%)", 
             "RSI", "200 EMA", "From 52W H (%)", "MCap (₹ Cr)"
         ]
 
+        # Rename Rank_Badge column to Rank for presentation
+        df_display = filtered[display_cols].rename(columns={"Rank_Badge": "Rank"})
+
         st.dataframe(
-            filtered[display_cols],
+            df_display,
             use_container_width=True,
             hide_index=True,
-            height=min(500, (len(filtered) + 1) * 35 + 10)
+            height=min(550, (len(filtered) + 1) * 35 + 10)
         )
 
         col_dl, col_info = st.columns([2, 5])
@@ -219,12 +286,12 @@ if not df.empty:
             st.download_button(
                 "📥 Export Filtered List (CSV)",
                 data=filtered[display_cols].to_csv(index=False).encode('utf-8'),
-                file_name=f"dividend_screener_{datetime.datetime.now(IST).strftime('%Y%m%d_%H%M')}.csv",
+                file_name=f"ranked_dividend_screener_{datetime.datetime.now(IST).strftime('%Y%m%d_%H%M')}.csv",
                 mime="text/csv",
                 use_container_width=True
             )
         with col_info:
-            st.caption("ℹ️ **Quality Score (0-100)** incorporates cash distribution sustainability, institutional holding depth, promoter commitment, balance sheet leverage, and trend strength.")
+            st.caption("ℹ️ **Sorted by Rank (Rank 1 = Most Preferred Buy)**. Combines Sovereign Yield Spread advantage, Quality Score, 52W High margin of safety, payout sustainability, and technical trend.")
 
     with tab_charts:
         c_ch1, c_ch2 = st.columns(2)
@@ -234,13 +301,12 @@ if not df.empty:
                 fig_spread = px.bar(
                     filtered.head(15),
                     x="Ticker",
-                    y="G-Sec Spread (bps)",
+                    y="Buy Score",
                     color="Yield (%)",
                     color_continuous_scale="Viridis",
-                    title="Top 15 Assets: Spread over 10Y Indian Sovereign Benchmark (bps)",
-                    hover_data=["Name", "Class", "Yield (%)", "CMP (₹)"]
+                    title="Top 15 Ranked Assets: Buy Conviction Score (0 - 100)",
+                    hover_data=["Name", "Class", "Yield (%)", "CMP (₹)", "G-Sec Spread (bps)"]
                 )
-                fig_spread.add_hline(y=0, line_dash="dash", line_color="red", annotation_text="10Y G-Sec (6.80%)")
                 fig_spread.update_layout(height=380, margin=dict(l=10, r=10, t=35, b=10))
                 st.plotly_chart(fig_spread, use_container_width=True)
 
@@ -249,22 +315,47 @@ if not df.empty:
                     filtered,
                     x="From 52W H (%)",
                     y="Yield (%)",
-                    size="Quality Score",
+                    size="Buy Score",
                     color="Type",
                     hover_name="Name",
-                    title="Yield vs 52-Week High Discount (Bubble size = Quality Score)",
+                    title="Yield vs 52-Week High Discount (Bubble size = Buy Conviction Score)",
                     labels={"From 52W H (%)": "% from 52W High (Discount)", "Yield (%)": "Cash Yield (%)"}
                 )
                 fig_scatter.update_layout(height=380, margin=dict(l=10, r=10, t=35, b=10))
                 st.plotly_chart(fig_scatter, use_container_width=True)
-        except Exception as e:
+        except Exception:
             # Native Streamlit Fallback Charts
             with c_ch1:
-                st.markdown("##### Spread over 10Y Sovereign Yield (bps)")
-                st.bar_chart(filtered.set_index("Ticker")["G-Sec Spread (bps)"].head(15))
+                st.markdown("##### Buy Conviction Score (Top 15)")
+                st.bar_chart(filtered.set_index("Ticker")["Buy Score"].head(15))
             with c_ch2:
                 st.markdown("##### Distribution Yield (%) by Ticker")
                 st.bar_chart(filtered.set_index("Ticker")["Yield (%)"].head(15))
+
+    with tab_methodology:
+        st.markdown(
+            f"""
+            #### 📐 Institutional Buy Suitability Ranking Methodology (Rank #1 = Most Preferred)
+            
+            Every asset in the screener is scored on a transparent **100-Point Quantitative Conviction Scale**:
+            
+            | Evaluation Pillar | Weight | Metric & Direction | Institutional Rationale |
+            | :--- | :---: | :--- | :--- |
+            | **1. Sovereign Spread Advantage** | **30%** | `Yield (%)` vs 10Y G-Sec ({INDIA_10Y_GSEC_BENCHMARK:.2f}%) *(Higher = Better)* | The fundamental rationale for owning yield assets is the risk premium over risk-free government debt. |
+            | **2. Institutional Quality & Moat** | **25%** | `Quality Score (0-100)` *(Higher = Better)* | Evaluates Institutional (FII + DII) ownership depth, sovereign/sponsor pedigree (PSUs, NHAI, PowerGrid), and balance sheet safety. |
+            | **3. Valuation Margin of Safety** | **20%** | `% Discount from 52W High` *(Higher Discount = Better)* | Accumulating high-yield assets at a pullback provides downside price protection and locks in higher yield on cost. |
+            | **4. Distribution Sustainability** | **15%** | `Payout Ratio (%)` & `Debt/Equity` *(Moderate Payout + Low Leverage = Better)* | Statutory 90%+ NDCF pass-through for REITs/InvITs; prudent 30%–80% payout with D/E < 2.0 for equities. Avoids debt-funded dividend traps. |
+            | **5. Technical Entry Zone** | **10%** | `RSI (14)` & `Moving Averages` *(Healthy Accumulation = Better)* | RSI in the 35–55 accumulation corridor with support near/above 50 & 200 EMAs. |
+            
+            ---
+            
+            ##### 🏷️ Buy Suitability Tiers
+            - **🥇 Rank 1 to 5 (`🔥 Top Conviction Buy`)**: Premier risk-reward ratio, significant yield spread above sovereign bonds, backed by strong institutional sponsorship and sustainable cash distributions.
+            - **Rank 6 to 12 (`🟢 Strong Accumulate`)**: High-quality aristocrats and trusts trading near fair value with dependable recurring cash payouts.
+            - **Rank 13 to 22 (`🟡 Moderate Buy`)**: Quality dividend payers with moderate yield spread or cyclical price exposure.
+            - **Rank 23+ (`⚪ Defensive / Hold`)**: Lower yield spread relative to sovereign bonds, higher leverage, or extended technical valuations.
+            """
+        )
 
     with tab_tax_guide:
         st.markdown(
