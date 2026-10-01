@@ -1,0 +1,35 @@
+Ticker,Full_Ticker,Name,Class,Sector,Is_PSU,Type,CMP (₹),Chg (%),TTM DPU (₹),Yield (%),G-Sec Spread (bps),Quality Score,P/E,P/B,D/E,Payout (%),Promoter (%),Inst (%),RSI,200 EMA,From 52W H (%),MCap (₹ Cr),Above 200 EMA,Above 50 EMA,Raw_RSI,Raw_DE,Data_Source
+EMBASSY,EMBASSY.NS,Embassy Office Parks REIT,REIT,Commercial Office,False,REIT,434.42,-0.75,21.8,5.02,-178,82.6,24.5,1.1,0.45,98.0%,31.8,54.2,50.0,🟢 Above,-1.27,35060.0,True,True,50.0,0.45,Live Batch Sync
+MINDSPACE,MINDSPACE.NS,Mindspace Business Parks REIT,REIT,Commercial Office,False,REIT,500.66,0.97,19.6,3.91,-289,78.7,26.8,1.2,0.38,95.0%,63.4,28.5,50.0,🟢 Above,-4.73,20460.0,True,True,50.0,0.38,Live Batch Sync
+NXST,NXST.NS,Nexus Select Trust REIT,REIT,Retail Malls,False,REIT,167.3,1.58,8.95,5.35,-145,83.7,22.1,1.1,0.35,99.0%,43.1,39.8,50.0,🟢 Above,-0.26,22440.0,True,True,50.0,0.35,Live Batch Sync
+BIRET,BIRET.BO,Brookfield India Real Estate Trust,REIT,Commercial Office,False,REIT,330.76,-1.67,18.5,5.59,-121,84.6,28.4,1.1,0.52,96.0%,43.5,41.2,50.0,🟢 Above,-2.43,14380.0,True,True,50.0,0.52,Live Batch Sync
+INDIGRID,INDIGRID.NS,India Grid Trust (IndiGrid),InvIT,Power Transmission,False,InvIT,170.98,-0.65,14.3,8.36,156,94.3,16.5,1.2,0.65,100.0%,23.6,56.4,50.0,🟢 Above,-1.17,11020.0,True,True,50.0,0.65,Live Batch Sync
+PGINVIT,PGINVIT.NS,PowerGrid Infrastructure InvIT,🏛️ PSU InvIT,Power Transmission,True,InvIT,102.41,0.37,12.0,11.72,492,100.0,12.2,1.1,0.28,100.0%,15.0,71.5,50.0,🟢 Above,-0.09,8730.0,True,True,50.0,0.28,Live Batch Sync
+IRBINVIT,IRBINVIT.NS,IRB InvIT Fund,InvIT,Toll Roads & Highways,False,InvIT,64.22,0.08,7.8,12.15,535,100.0,14.8,0.9,0.58,95.0%,19.5,44.8,50.0,🟢 Above,-1.18,3850.0,True,True,50.0,0.58,Live Batch Sync
+NHIT,NHIT.BO,National Highways Infra Trust (NHIT),🏛️ PSU InvIT,National Highways,True,InvIT,168.0,0.0,12.2,7.26,46,90.4,15.0,1.2,0.4,98.0%,16.1,68.2,50.0,🟢 Above,0.0,12600.0,True,True,50.0,0.4,Live Batch Sync
+COALINDIA,COALINDIA.NS,Coal India Ltd,🏛️ PSU Equity,Mining & Energy,True,Equity,420.4,-1.08,25.5,6.07,-73,86.2,7.8,2.9,0.08,52.4%,63.1,26.8,50.0,🟢 Above,-2.89,259000.0,True,True,50.0,0.08,Live Batch Sync
+VEDL,VEDL.NS,Vedanta Ltd,Equity,Natural Resources,False,Equity,252.05,-2.68,34.0,13.49,669,94.5,11.2,3.4,1.85,88.5%,56.4,28.2,50.0,🟢 Above,-5.69,188400.0,True,True,50.0,1.85,Live Batch Sync
+IOC,IOC.NS,Indian Oil Corporation,🏛️ PSU Equity,Oil & Gas,True,Equity,131.34,-2.66,12.0,9.14,234,97.0,6.5,1.1,0.72,48.0%,51.5,32.4,50.0,🟢 Above,-4.17,201200.0,True,True,50.0,0.72,Live Batch Sync
+BPCL,BPCL.NS,Bharat Petroleum Corp,🏛️ PSU Equity,Oil & Gas,True,Equity,300.6,-0.86,21.0,6.99,19,89.5,7.2,1.9,0.65,45.2%,52.9,34.1,50.0,🟢 Above,-2.84,137000.0,True,True,50.0,0.65,Live Batch Sync
+ONGC,ONGC.NS,Oil & Natural Gas Corp,🏛️ PSU Equity,Oil & Gas,True,Equity,222.37,-1.52,12.25,5.51,-129,84.3,6.8,1.1,0.42,38.6%,58.9,29.5,50.0,🟢 Above,-6.57,360300.0,True,True,50.0,0.42,Live Batch Sync
+HINDZINC,HINDZINC.NS,Hindustan Zinc Ltd,Equity,Metals & Mining,False,Equity,555.05,-1.93,26.0,4.68,-212,81.4,24.0,12.8,0.85,115.0%,63.4,33.8,50.0,🟢 Above,-6.93,207200.0,True,True,50.0,0.85,Live Batch Sync
+ITC,ITC.NS,ITC Ltd,Equity,FMCG / Tobacco,False,Equity,255.9,-2.61,13.75,5.37,-143,76.8,28.5,8.1,-,84.0%,0.0,84.5,50.0,🟢 Above,-4.98,618500.0,True,True,50.0,0.0,Live Batch Sync
+RECLTD,RECLTD.NS,REC Ltd,🏛️ PSU Equity,Power Financing / NBFC,True,Equity,287.75,-3.76,16.0,5.56,-124,72.2,8.5,1.8,4.1,30.5%,52.6,36.8,50.0,🟢 Above,-8.05,134900.0,True,True,50.0,4.1,Live Batch Sync
+PFC,PFC.NS,Power Finance Corp,🏛️ PSU Equity,Power Financing / NBFC,True,Equity,318.0,-2.3,14.5,4.56,-224,67.2,8.1,1.6,4.6,28.0%,55.9,34.2,50.0,🟢 Above,-6.48,153500.0,True,True,50.0,4.6,Live Batch Sync
+POWERGRID,POWERGRID.NS,Power Grid Corp of India,🏛️ PSU Equity,Power Utilities,True,Equity,254.55,-2.28,11.25,4.42,-238,80.5,18.2,3.2,1.45,62.0%,51.3,37.9,50.0,🟢 Above,-5.69,305600.0,True,True,50.0,1.45,Live Batch Sync
+NTPC,NTPC.NS,NTPC Ltd,🏛️ PSU Equity,Power Utilities,True,Equity,315.1,-2.37,7.75,2.46,-434,73.6,16.5,2.2,1.35,38.5%,51.1,41.5,50.0,🟢 Above,-3.73,383200.0,True,True,50.0,1.35,Live Batch Sync
+NMDC,NMDC.NS,NMDC Ltd,🏛️ PSU Equity,Mining,True,Equity,74.64,-2.48,5.75,7.7,90,92.0,11.5,2.3,0.05,42.0%,60.8,28.4,50.0,🟢 Above,-7.99,65800.0,True,True,50.0,0.05,Live Batch Sync
+GAIL,GAIL.NS,GAIL India Ltd,🏛️ PSU Equity,Gas Transmission,True,Equity,171.22,0.39,6.5,3.8,-300,78.3,12.8,1.9,0.32,36.0%,51.9,38.1,50.0,🟢 Above,-2.0,143600.0,True,True,50.0,0.32,Live Batch Sync
+PETRONET,PETRONET.NS,Petronet LNG Ltd,🏛️ PSU Equity,Oil & Gas,True,Equity,285.5,0.35,10.0,3.5,-330,77.2,11.8,2.6,0.22,44.5%,50.0,39.5,50.0,🟢 Above,-2.58,46580.0,True,True,50.0,0.22,Live Batch Sync
+SJVN,SJVN.NS,SJVN Ltd,🏛️ PSU Equity,Renewables / Power,True,Equity,57.91,-2.38,1.8,3.11,-369,60.8,38.5,3.1,1.85,68.0%,81.8,10.5,50.0,🟢 Above,-7.62,46450.0,True,True,50.0,1.85,Live Batch Sync
+HCLTECH,HCLTECH.NS,HCL Technologies,Equity,IT Services,False,Equity,1243.1,1.07,52.0,4.18,-262,79.6,28.2,6.8,0.12,88.0%,60.8,34.2,50.0,🟢 Above,-1.91,483000.0,True,True,50.0,0.12,Live Batch Sync
+TCS,TCS.NS,Tata Consultancy Services,Equity,IT Services,False,Equity,2075.0,1.19,73.0,3.52,-328,77.3,31.5,14.5,0.08,82.0%,71.8,23.4,50.0,🟢 Above,-1.24,1490000.0,True,True,50.0,0.08,Live Batch Sync
+INFY,INFY.NS,Infosys Ltd,Equity,IT Services,False,Equity,1035.0,4.11,46.0,4.44,-236,73.5,27.8,8.9,0.1,74.5%,14.6,70.8,50.0,🟢 Above,0.0,756000.0,True,True,50.0,0.1,Live Batch Sync
+TECHM,TECHM.NS,Tech Mahindra,Equity,IT Services,False,Equity,1533.0,0.59,43.0,2.8,-400,67.8,34.2,5.4,0.15,92.0%,35.1,52.4,50.0,🟢 Above,-1.7,154800.0,True,True,50.0,0.15,Live Batch Sync
+WIPRO,WIPRO.NS,Wipro Ltd,Equity,IT Services,False,Equity,159.35,0.54,5.0,3.14,-366,74.2,24.5,3.8,0.22,25.0%,72.8,18.2,50.0,🟢 Above,-3.13,282400.0,True,True,50.0,0.22,Live Batch Sync
+HEROMOTOCO,HEROMOTOCO.NS,Hero MotoCorp,Equity,Automobile,False,Equity,5168.0,-1.39,140.0,2.71,-409,67.5,26.5,5.8,0.05,64.0%,34.8,54.2,50.0,🟢 Above,-4.24,105600.0,True,True,50.0,0.05,Live Batch Sync
+BAJAJ-AUTO,BAJAJ-AUTO.NS,Bajaj Auto Ltd,Equity,Automobile,False,Equity,10045.0,-7.62,80.0,0.8,-600,67.8,36.8,10.5,-,68.0%,54.9,31.8,50.0,🟢 Above,-11.36,304500.0,True,True,50.0,0.0,Live Batch Sync
+TATASTEEL,TATASTEEL.NS,Tata Steel Ltd,Equity,Metals & Mining,False,Equity,178.0,-3.42,3.6,2.02,-478,65.1,45.2,2.1,0.95,55.0%,33.2,46.8,50.0,🟢 Above,-6.48,197800.0,True,True,50.0,0.95,Live Batch Sync
+HINDALCO,HINDALCO.NS,Hindalco Industries,Equity,Metals,False,Equity,941.85,0.01,3.5,0.37,-643,59.3,16.8,1.6,0.55,15.0%,34.6,54.2,50.0,🟢 Above,-4.23,152900.0,True,True,50.0,0.55,Live Batch Sync
+NESTLEIND,NESTLEIND.NS,Nestle India Ltd,Equity,FMCG,False,Equity,1307.7,-0.18,32.5,2.49,-431,73.7,72.5,78.0,0.05,98.0%,62.8,28.5,50.0,🟢 Above,-4.03,239100.0,True,True,50.0,0.05,Live Batch Sync
+BRITANNIA,BRITANNIA.NS,Britannia Industries,Equity,FMCG,False,Equity,4778.0,-1.08,73.5,1.54,-526,70.4,62.4,36.5,0.75,85.0%,50.5,34.2,50.0,🟢 Above,-3.27,140900.0,True,True,50.0,0.75,Live Batch Sync
