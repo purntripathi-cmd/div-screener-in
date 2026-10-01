@@ -1,14 +1,3 @@
----
-title: Screener
-emoji: 🏢
-colorFrom: green
-colorTo: indigo
-sdk: streamlit
-sdk_version: "1.38.0"
-app_file: app.py
-pinned: false
----
-
 # ⚡ Institutional Dividend, REIT & InvIT Screener
 
 A quantitative institutional screening and ranking engine for Indian Real Estate Investment Trusts (REITs), Infrastructure Investment Trusts (InvITs), and High-Yield Dividend Equities listed on the NSE & BSE.
